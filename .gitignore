@@ -2,5 +2,5 @@ node_modules/
 dist/
 *.apk
 .gradle/
-build/
+/build/
 local.properties
