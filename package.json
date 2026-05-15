@@ -1,0 +1,20 @@
+{
+  "name": "apkwrapper",
+  "version": "1.0.0",
+  "description": "Convert HTML/JS web apps into Android APK files",
+  "type": "module",
+  "bin": {
+    "apkwrapper": "./bin/apkwrapper.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "execa": "^9.0.0",
+    "fs-extra": "^11.2.0",
+    "ora": "^8.0.0",
+    "sharp": "^0.33.0"
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #1a73e8;
+      color: white;
+    }
+    h1 { font-size: 2rem; margin-bottom: 1rem; }
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: 2px solid white;
+      background: transparent;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(255,255,255,0.2); }
+    #count { font-size: 3rem; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Hello from WebView!</h1>
+  <div id="count">0</div>
+  <button onclick="document.getElementById('count').textContent = +document.getElementById('count').textContent + 1">
+    Tap me!
+  </button>
+</body>
+</html>
