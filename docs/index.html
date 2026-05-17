@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApkWrapper — Converte HTML/JS em Android APK</title>
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1558b0;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #202124;
+      --text-muted: #5f6368;
+      --border: #dadce0;
+      --code-bg: #f1f3f4;
+      --success: #188038;
+      --warning: #e37400;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, #0d47a1 100%);
+      color: white;
+      padding: 64px 24px 56px;
+      text-align: center;
+    }
+    .hero-icon {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .hero h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 700; margin-bottom: 12px; }
+    .hero p  { font-size: 1.15rem; opacity: .88; max-width: 560px; margin: 0 auto 28px; }
+    .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .82rem;
+      font-weight: 500;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Steps nav ── */
+    .steps-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .steps-bar .container {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .steps-bar a {
+      white-space: nowrap;
+      padding: 14px 18px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: .88rem;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .steps-bar a:hover { color: var(--primary); border-color: var(--primary); }
+
+    /* ── Sections ── */
+    .section { padding: 48px 0 16px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .step-number {
+      width: 36px; height: 36px; min-width: 36px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .95rem;
+    }
+    .section h2 { font-size: 1.35rem; font-weight: 700; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p, .card li { font-size: .95rem; color: var(--text); margin-bottom: 6px; }
+    .card ul { padding-left: 20px; }
+    .card a { color: var(--primary); }
+
+    .req-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .req-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .req-card .icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .req-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .req-card p  { font-size: .88rem; color: var(--text-muted); margin-bottom: 10px; }
+    .req-card a  {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .req-card a:hover { background: var(--primary-dark); }
+
+    /* ── Code blocks ── */
+    .code-block {
+      position: relative;
+      background: #1e1e2e;
+      border-radius: var(--radius);
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    .code-block .lang-tag {
+      position: absolute; top: 10px; right: 44px;
+      font-size: .72rem; color: #888; font-family: monospace;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #ccc;
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.16); }
+    .copy-btn.copied { color: #6fcf97; border-color: #6fcf97; }
+    pre {
+      padding: 16px 20px 16px;
+      overflow-x: auto;
+      font-size: .88rem;
+    }
+    code {
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+      color: #cdd6f4;
+      line-height: 1.7;
+    }
+    /* Inline code */
+    p code, li code, td code {
+      background: var(--code-bg);
+      color: #c0392b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: .88em;
+    }
+    /* Syntax hints */
+    code .comment { color: #6c7086; }
+    code .cmd     { color: #89dceb; }
+    code .flag    { color: #f9e2af; }
+    code .path    { color: #a6e3a1; }
+    code .string  { color: #a6e3a1; }
+
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; margin: 12px 0 20px; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    thead { background: var(--code-bg); }
+    th { text-align: left; padding: 10px 14px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .optional { color: var(--text-muted); font-size: .85em; }
+    .required-badge {
+      display: inline-block;
+      background: #fce8e6;
+      color: #c5221f;
+      font-size: .75rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      display: flex;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      margin: 16px 0;
+      font-size: .93rem;
+    }
+    .callout-info    { background: #e8f0fe; border-left: 4px solid var(--primary); }
+    .callout-warning { background: #fef7e0; border-left: 4px solid var(--warning); }
+    .callout-success { background: #e6f4ea; border-left: 4px solid var(--success); }
+    .callout-icon { font-size: 1.1rem; margin-top: 1px; }
+
+    /* ── Troubleshooting ── */
+    .trouble-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .trouble-item summary {
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: .95rem;
+      background: var(--surface);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .trouble-item summary::-webkit-details-marker { display: none; }
+    .trouble-item summary::before {
+      content: "▶";
+      font-size: .7rem;
+      color: var(--text-muted);
+      transition: transform .2s;
+    }
+    .trouble-item[open] summary::before { transform: rotate(90deg); }
+    .trouble-item .trouble-body {
+      padding: 0 18px 16px;
+      font-size: .93rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .trouble-body p { margin-top: 12px; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+      font-size: .88rem;
+      border-top: 1px solid var(--border);
+      margin-top: 48px;
+    }
+    footer a { color: var(--primary); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 40px 16px 36px; }
+      .section { padding: 36px 0 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-icon">📦</div>
+  <h1>ApkWrapper</h1>
+  <p>Converte a tua app web (HTML + JavaScript + CSS) num ficheiro <strong>.apk</strong> instalável em qualquer telemóvel Android.</p>
+  <div class="hero-badges">
+    <span class="badge">Node.js</span>
+    <span class="badge">Kotlin · Android</span>
+    <span class="badge">Windows · macOS · Linux</span>
+    <span class="badge">Open Source</span>
+  </div>
+</div>
+
+<!-- Steps nav -->
+<nav class="steps-bar">
+  <div class="container">
+    <a href="#prereqs">1. Pré-requisitos</a>
+    <a href="#android-home">2. ANDROID_HOME</a>
+    <a href="#instalar">3. Instalar</a>
+    <a href="#utilizar">4. Utilizar</a>
+    <a href="#instalar-apk">5. Instalar APK</a>
+    <a href="#problemas">Problemas?</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ── 1. Pré-requisitos ── -->
+  <section class="section" id="prereqs">
+    <div class="section-header">
+      <div class="step-number">1</div>
+      <h2>Instalar os pré-requisitos</h2>
+    </div>
+
+    <div class="req-grid">
+      <div class="req-card">
+        <div class="icon">🟢</div>
+        <h3>Node.js <small style="font-weight:400;color:var(--text-muted)">v18+</small></h3>
+        <p>Motor JavaScript necessário para correr o ApkWrapper.</p>
+        <a href="https://nodejs.org" target="_blank">Descarregar Node.js</a>
+      </div>
+      <div class="req-card">
+        <div class="icon">☕</div>
+        <h3>Java JDK <small style="font-weight:400;color:var(--text-muted)">v17+</small></h3>
+        <p>Necessário para o Gradle construir o projeto Android.</p>
+        <a href="https://adoptium.net" target="_blank">Descarregar JDK 17</a>
+      </div>
+      <div class="req-card">
+        <div class="icon">🤖</div>
+        <h3>Android SDK</h3>
+        <p>Ferramentas de build Android. Instala via Android Studio (mais fácil).</p>
+        <a href="https://developer.android.com/studio" target="_blank">Descarregar Android Studio</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>✅ Verificar instalações</h3>
+      <p>Após instalar tudo, corre estes comandos para confirmar:</p>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code>node --version    <span class="comment"># deve mostrar v18.x.x ou superior</span>
+java --version    <span class="comment"># deve mostrar openjdk 17 ou superior</span></code></pre>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">💡</span>
+      <div>Não precisas de saber programar Android. O ApkWrapper trata de tudo — basta teres os teus ficheiros HTML/JS prontos.</div>
+    </div>
+  </section>
+
+  <!-- ── 2. ANDROID_HOME ── -->
+  <section class="section" id="android-home">
+    <div class="section-header">
+      <div class="step-number">2</div>
+      <h2>Configurar a variável ANDROID_HOME</h2>
+    </div>
+
+    <p style="margin-bottom:16px;color:var(--text-muted)">O ApkWrapper precisa de saber onde está o Android SDK instalado. Configura a variável de ambiente <code>ANDROID_HOME</code> de acordo com o teu sistema operativo.</p>
+
+    <div class="card">
+      <h3>🪟 Windows</h3>
+      <p>Executa no PowerShell (substitui <code>&lt;teu-nome&gt;</code> pelo teu nome de utilizador):</p>
+      <div class="code-block">
+        <span class="lang-tag">powershell</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code>[System.Environment]::SetEnvironmentVariable(<span class="string">"ANDROID_HOME"</span>, <span class="string">"C:\Users\&lt;teu-nome&gt;\AppData\Local\Android\Sdk"</span>, <span class="string">"User"</span>)</code></pre>
+      </div>
+      <p style="font-size:.88rem;color:var(--text-muted);margin-top:8px">Fecha e reabre o terminal após executar.</p>
+    </div>
+
+    <div class="card">
+      <h3>🍎 macOS</h3>
+      <p>Adiciona ao ficheiro <code>~/.zshrc</code> (ou <code>~/.bash_profile</code>):</p>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="cmd">echo</span> <span class="string">'export ANDROID_HOME=~/Library/Android/sdk'</span> >> ~/.zshrc
+<span class="cmd">source</span> ~/.zshrc</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🐧 Linux</h3>
+      <p>Adiciona ao ficheiro <code>~/.bashrc</code>:</p>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="cmd">echo</span> <span class="string">'export ANDROID_HOME=~/Android/Sdk'</span> >> ~/.bashrc
+<span class="cmd">source</span> ~/.bashrc</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>✅ Verificar</h3>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="comment"># Windows (PowerShell)</span>
+echo $env:ANDROID_HOME
+
+<span class="comment"># macOS / Linux</span>
+echo $ANDROID_HOME</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. Instalar ── -->
+  <section class="section" id="instalar">
+    <div class="section-header">
+      <div class="step-number">3</div>
+      <h2>Instalar o ApkWrapper</h2>
+    </div>
+
+    <div class="code-block">
+      <span class="lang-tag">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      <pre><code><span class="comment"># Clonar o repositório</span>
+<span class="cmd">git clone</span> <span class="path">https://github.com/david12345/ApkWrapper.git</span>
+<span class="cmd">cd</span> ApkWrapper
+
+<span class="comment"># Instalar dependências</span>
+<span class="cmd">npm install</span></code></pre>
+    </div>
+
+    <div class="callout callout-warning">
+      <span class="callout-icon">⏳</span>
+      <div>O <code>npm install</code> pode demorar alguns minutos na primeira vez — está a descarregar as dependências necessárias.</div>
+    </div>
+  </section>
+
+  <!-- ── 4. Utilizar ── -->
+  <section class="section" id="utilizar">
+    <div class="section-header">
+      <div class="step-number">4</div>
+      <h2>Converter a tua app</h2>
+    </div>
+
+    <div class="card">
+      <h3>📁 Estrutura da tua app web</h3>
+      <p>A pasta da tua app deve ter um <code>index.html</code> na raiz:</p>
+      <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code>minha-app/
+├── <span class="path">index.html</span>   <span class="comment">← obrigatório</span>
+├── style.css
+├── app.js
+└── imagens/</code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🚀 Exemplo básico</h3>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="cmd">node</span> bin/apkwrapper.js build <span class="path">./minha-app</span> <span class="flag">--name</span> <span class="string">"A Minha App"</span></code></pre>
+      </div>
+      <p style="font-size:.9rem;margin-top:10px">O ficheiro <code>.apk</code> é gerado em <code>./dist/A-Minha-App-v1.0.0.apk</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>⚙️ Exemplo completo</h3>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="cmd">node</span> bin/apkwrapper.js build <span class="path">./minha-app</span> \
+  <span class="flag">--name</span>         <span class="string">"A Minha App"</span> \
+  <span class="flag">--package</span>      <span class="string">com.empresa.minhaapp</span> \
+  <span class="flag">--version-name</span> <span class="string">1.2.0</span> \
+  <span class="flag">--version-code</span> <span class="string">3</span> \
+  <span class="flag">--icon</span>         <span class="path">./icone.png</span> \
+  <span class="flag">--output</span>       <span class="path">./apks</span> \
+  <span class="flag">--allow-http</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📋 Todas as opções</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Opção</th>
+              <th>Descrição</th>
+              <th>Valor padrão</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>--name</code></td>
+              <td>Nome da app (aparece no telemóvel) <span class="required-badge">obrigatório</span></td>
+              <td class="optional">—</td>
+            </tr>
+            <tr>
+              <td><code>--package</code></td>
+              <td>ID único da app (formato: <code>com.empresa.app</code>)</td>
+              <td><code>com.example.app</code></td>
+            </tr>
+            <tr>
+              <td><code>--version-name</code></td>
+              <td>Versão visível (ex: <code>1.0.0</code>)</td>
+              <td><code>1.0.0</code></td>
+            </tr>
+            <tr>
+              <td><code>--version-code</code></td>
+              <td>Versão interna — número inteiro que deve aumentar a cada update</td>
+              <td><code>1</code></td>
+            </tr>
+            <tr>
+              <td><code>--icon</code></td>
+              <td>Caminho para um PNG quadrado (512×512 recomendado)</td>
+              <td class="optional">ícone padrão</td>
+            </tr>
+            <tr>
+              <td><code>--output</code></td>
+              <td>Pasta onde a APK é guardada</td>
+              <td><code>./dist</code></td>
+            </tr>
+            <tr>
+              <td><code>--allow-http</code></td>
+              <td>Permite ligações HTTP (por padrão só HTTPS é permitido)</td>
+              <td class="optional">desativado</td>
+            </tr>
+            <tr>
+              <td><code>--android-sdk</code></td>
+              <td>Caminho manual para o SDK (alternativa a <code>ANDROID_HOME</code>)</td>
+              <td class="optional">—</td>
+            </tr>
+            <tr>
+              <td><code>--verbose</code></td>
+              <td>Mostra o output completo do Gradle</td>
+              <td class="optional">desativado</td>
+            </tr>
+            <tr>
+              <td><code>--keep-project</code></td>
+              <td>Mantém o projeto Android gerado (útil para abrir no Android Studio)</td>
+              <td class="optional">desativado</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="callout callout-warning">
+      <span class="callout-icon">⏳</span>
+      <div><strong>A primeira build demora mais.</strong> O Gradle descarrega ~200 MB de dependências. As builds seguintes são muito mais rápidas.</div>
+    </div>
+  </section>
+
+  <!-- ── 5. Instalar APK ── -->
+  <section class="section" id="instalar-apk">
+    <div class="section-header">
+      <div class="step-number">5</div>
+      <h2>Instalar a APK no telemóvel</h2>
+    </div>
+
+    <div class="card">
+      <h3>🔌 Opção A — Por USB (via adb)</h3>
+      <p>Com o telemóvel ligado por USB e depuração USB ativada:</p>
+      <div class="code-block">
+        <span class="lang-tag">bash</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        <pre><code><span class="cmd">adb install</span> <span class="path">dist/A-Minha-App-v1.0.0.apk</span></code></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📲 Opção B — Manual (sem cabo)</h3>
+      <ol style="padding-left:20px;font-size:.95rem;line-height:2">
+        <li>Copia o ficheiro <code>.apk</code> para o telemóvel (USB, email, Google Drive, etc.)</li>
+        <li>No telemóvel, vai a <strong>Definições → Segurança → Instalar apps desconhecidas</strong> e permite a instalação</li>
+        <li>Abre o ficheiro <code>.apk</code> no telemóvel para instalar</li>
+      </ol>
+    </div>
+
+    <div class="callout callout-success">
+      <span class="callout-icon">✅</span>
+      <div>A APK é assinada automaticamente com uma chave de debug gerada na primeira utilização. É suficiente para uso pessoal e testes.</div>
+    </div>
+  </section>
+
+  <!-- ── Problemas ── -->
+  <section class="section" id="problemas">
+    <div class="section-header">
+      <div class="step-number" style="background:var(--warning)">?</div>
+      <h2>Resolução de problemas</h2>
+    </div>
+
+    <details class="trouble-item">
+      <summary>🔴 <code>Android SDK not found</code></summary>
+      <div class="trouble-body">
+        <p>A variável <code>ANDROID_HOME</code> não está definida ou aponta para um caminho errado.</p>
+        <p><strong>Solução:</strong> Volta ao passo 2 e confirma que a variável está corretamente configurada. Alternativamente, passa o caminho diretamente:</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          <pre><code>node bin/apkwrapper.js build ./app --name "App" --android-sdk <span class="path">C:\Users\nome\AppData\Local\Android\Sdk</span></code></pre>
+        </div>
+      </div>
+    </details>
+
+    <details class="trouble-item">
+      <summary>🔴 <code>No index.html found</code></summary>
+      <div class="trouble-body">
+        <p>A pasta que indicaste não tem um ficheiro <code>index.html</code> na raiz.</p>
+        <p><strong>Solução:</strong> Confirma que o caminho está correto e que existe um <code>index.html</code> diretamente dentro da pasta (não numa subpasta).</p>
+      </div>
+    </details>
+
+    <details class="trouble-item">
+      <summary>🔴 <code>Invalid package name</code></summary>
+      <div class="trouble-body">
+        <p>O <code>--package</code> fornecido não está no formato correto.</p>
+        <p><strong>Solução:</strong> Usa pelo menos 3 segmentos separados por ponto, todos em minúsculas. Exemplos válidos:</p>
+        <div class="code-block">
+          <pre><code><span class="string">com.empresa.minhaapp</span>   <span class="comment">✓ correto</span>
+<span class="string">minhaapp</span>               <span class="comment">✗ faltam segmentos</span>
+<span class="string">com.MinhaApp</span>           <span class="comment">✗ maiúsculas não permitidas</span></code></pre>
+        </div>
+      </div>
+    </details>
+
+    <details class="trouble-item">
+      <summary>🔴 <code>java: command not found</code></summary>
+      <div class="trouble-body">
+        <p>O Java não está instalado ou não está no PATH do sistema.</p>
+        <p><strong>Solução:</strong> Instala o JDK 17 em <a href="https://adoptium.net" target="_blank">adoptium.net</a> e reinicia o terminal.</p>
+      </div>
+    </details>
+
+    <details class="trouble-item">
+      <summary>🟡 A build demora muito tempo</summary>
+      <div class="trouble-body">
+        <p>É normal na <strong>primeira vez</strong> — o Gradle descarrega ~200 MB de dependências Android. As builds seguintes usam a cache local e são muito mais rápidas (30–60 segundos).</p>
+      </div>
+    </details>
+
+    <details class="trouble-item">
+      <summary>🟡 A app abre mas não carrega o conteúdo</summary>
+      <div class="trouble-body">
+        <p>Se a tua app faz pedidos a servidores HTTP (não HTTPS), são bloqueados por padrão.</p>
+        <p><strong>Solução:</strong> Usa a opção <code>--allow-http</code> na build:</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          <pre><code>node bin/apkwrapper.js build ./app <span class="flag">--name</span> <span class="string">"App"</span> <span class="flag">--allow-http</span></code></pre>
+        </div>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>
+    <a href="https://github.com/david12345/ApkWrapper" target="_blank">Ver código no GitHub</a>
+    &nbsp;·&nbsp;
+    Código aberto — livre para usar e modificar
+  </p>
+</footer>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
