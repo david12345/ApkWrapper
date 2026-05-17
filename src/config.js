@@ -13,7 +13,7 @@ const DEFAULTS = {
   versionName: '1.0.0',
   versionCode: 1,
   minSdk: 21,
-  targetSdk: 34,
+  targetSdk: 35,
   output: './dist',
   allowHttp: false,
   useDocker: false,

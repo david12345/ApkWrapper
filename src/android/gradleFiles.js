@@ -4,8 +4,8 @@ import os from 'os';
 export function generateRootBuildGradle() {
   return `// Top-level build file
 plugins {
-    id 'com.android.application' version '8.2.2' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+    id 'com.android.application' version '8.5.0' apply false
+    id 'org.jetbrains.kotlin.android' version '2.0.0' apply false
 }
 `;
 }
@@ -53,7 +53,7 @@ export function generateAppBuildGradle(cfg, keystorePath) {
 
 android {
     namespace '${cfg.package}'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId '${cfg.package}'
@@ -103,7 +103,7 @@ dependencies {
 export function generateGradleWrapperProperties() {
   return `distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\\://services.gradle.org/distributions/gradle-8.2-bin.zip
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.11.1-bin.zip
 networkTimeout=10000
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
